@@ -9,7 +9,7 @@ LEFT_KEY_CODE = 260
 RIGHT_KEY_CODE = 261
 UP_KEY_CODE = 259
 DOWN_KEY_CODE = 258
-TIC_TIMEOUT = 0.005
+TIC_TIMEOUT = 0.05
 spaceship_row = 0
 spaceship_column = 0
 stars = [
@@ -102,21 +102,28 @@ def draw_frame(canvas,
 
 
 async def animate_spaceship(canvas):
-  global spaceship_row, spaceship_column
+  spaceship_row = 0
+  spaceship_column = 0
   rocket_frames = []
   for i in range(1, 3):
     with open(f"images/rocket_frame_{i}.txt", "r") as my_file:
       rocket_frames.append(my_file.read())
   iterator = cycle(rocket_frames)
+  rocket_frame = next(iterator)
+
   while True:
-    global rocket_frame
-    rocket_frame = next(iterator)
     
-    draw_frame(canvas, spaceship_row, spaceship_column, rocket_frame)
+    rows_direction, columns_direction, space_pressed = read_controls(canvas)
     canvas.refresh()
-    
+    draw_frame(canvas, spaceship_row, spaceship_column, rocket_frame,  negative=True)
     await asyncio.sleep(0)
-    draw_frame(canvas, spaceship_row, spaceship_column, rocket_frame, negative=True)
+
+    canvas.border()
+    spaceship_row += rows_direction
+    spaceship_column += columns_direction
+    spaceship_row, spaceship_column = check_boundary(canvas, spaceship_row, spaceship_column, rocket_frame)
+    draw_frame(canvas, spaceship_row, spaceship_column, rocket_frame)
+    await asyncio.sleep(0)
     
 
 async def fire(canvas,
@@ -177,26 +184,10 @@ async def blink(canvas, row, column, symbol):
 def draw(canvas):
   curses.curs_set(0)
   canvas.border()
-  global spaceship_row, spaceship_column
   canvas.nodelay(True)
   max_y, max_x = canvas.getmaxyx()
-  coroutines_fire = [
-      fire(canvas, start_row=max_y - 1, start_column=max_x // 2)
-  ]
-  
-  while True:
-    
-    for coroutine in coroutines_fire.copy():
-      try:
-        coroutine.send(None)
-      except StopIteration:
-        coroutines_fire.remove(coroutine)
-    if len(coroutines_fire) == 0:
-      break
-    
-    time.sleep(TIC_TIMEOUT)
-  coroutines = []
-  
+  coroutines = [fire(canvas, start_row=max_y - 1, start_column=max_x // 2)]
+
   coroutines.append(animate_spaceship(canvas))
   for i in range(1000):
     coroutines.append(
@@ -213,18 +204,8 @@ def draw(canvas):
             coroutine.send(None)
             canvas.refresh()
         except StopIteration:
-            break
-
-    global rocket_frame
-    rows_direction, columns_direction, space_pressed = read_controls(canvas)
-    draw_frame(canvas, spaceship_row, spaceship_column, rocket_frame, negative=True)
-    canvas.border()
-    spaceship_row += rows_direction
-    spaceship_column += columns_direction
-    spaceship_row, spaceship_column = check_boundary(canvas, spaceship_row, spaceship_column, rocket_frame)
-    time.sleep(TIC_TIMEOUT)
-
-
+          coroutines.remove(coroutine)
+          
 if __name__ == '__main__':
     curses.update_lines_cols()
     curses.wrapper(draw)
