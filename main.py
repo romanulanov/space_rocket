@@ -39,8 +39,6 @@ async def animate_spaceship(canvas):
         await asyncio.sleep(0)
         rocket_frame = next(iterator)
         rows_direction, columns_direction, space_pressed = read_controls(canvas)
-        canvas.refresh()
-        canvas.border()
         spaceship_row += rows_direction
         spaceship_column += columns_direction
         spaceship_row, spaceship_column = check_boundary(canvas,
@@ -126,9 +124,10 @@ def draw(canvas):
 
     while True:
         for coroutine in coroutines:
+            canvas.refresh()
+            canvas.border()
             try:
                 coroutine.send(None)
-                canvas.refresh()
             except StopIteration:
                 coroutines.remove(coroutine)
 
