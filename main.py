@@ -5,9 +5,9 @@ import random
 from curses_tools import read_controls, check_boundary, draw_frame
 
 from itertools import cycle
+from time import sleep
 
-
-TIC_TIMEOUT = 0.5
+TIC_TIMEOUT = 0.1
 
 spaceship_row = 0
 spaceship_column = 0
@@ -26,27 +26,36 @@ async def animate_spaceship(canvas):
     for i in range(1, 3):
         with open(f"images/rocket_frame_{i}.txt", "r") as my_file:
             rocket_frames.append(my_file.read())
+           
+    rocket_frames = [rocket_frame for rocket_frame in rocket_frames for _ in range(2)]
     iterator = cycle(rocket_frames)
-    rocket_frame = next(iterator)
-
+   
     while True:
-        draw_frame(canvas,
-                   spaceship_row,
-                   spaceship_column,
-                   rocket_frame,
-                   negative=True,
-                   )
-        await asyncio.sleep(0)
         rocket_frame = next(iterator)
-        rows_direction, columns_direction, space_pressed = read_controls(canvas)
-        spaceship_row += rows_direction
-        spaceship_column += columns_direction
-        spaceship_row, spaceship_column = check_boundary(canvas,
-                                                         spaceship_row,
-                                                         spaceship_column,
-                                                         rocket_frame)
-        draw_frame(canvas, spaceship_row, spaceship_column, rocket_frame)
-        await asyncio.sleep(0)
+        for _ in range(2):
+            draw_frame(canvas,
+                    spaceship_row,
+                    spaceship_column,
+                    rocket_frame,
+                    
+                    )
+            await asyncio.sleep(0)
+            draw_frame(canvas,
+                    spaceship_row,
+                    spaceship_column,
+                    rocket_frame,
+                    negative=True,
+                    )
+            rows_direction, columns_direction, space_pressed = read_controls(canvas)
+            spaceship_row += rows_direction
+            spaceship_column += columns_direction
+            spaceship_row, spaceship_column = check_boundary(canvas,
+                                                            spaceship_row,
+                                                            spaceship_column,
+                                                            rocket_frame)
+            
+            await asyncio.sleep(0)
+        
 
 
 async def fire(canvas,
@@ -116,8 +125,8 @@ def draw(canvas):
     for i in range(1000):
         coroutines.append(
             blink(canvas,
-                  random.randint(1, max_y - 2),
-                  random.randint(1, max_x - 2),
+                  random.randint(0, max_y - 1),
+                  random.randint(0, max_x - 1),
                   random.choice(stars)
                   )
                 )
@@ -130,6 +139,7 @@ def draw(canvas):
                 coroutine.send(None)
             except StopIteration:
                 coroutines.remove(coroutine)
+
 
 
 if __name__ == '__main__':
