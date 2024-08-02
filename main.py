@@ -27,7 +27,7 @@ async def animate_spaceship(canvas):
         with open(f"images/rocket_frame_{i}.txt", "r") as my_file:
             rocket_frames.append(my_file.read())
            
-    rocket_frames = [rocket_frame for rocket_frame in rocket_frames for _ in range(2)]
+
     iterator = cycle(rocket_frames)
    
     while True:
@@ -132,14 +132,13 @@ def draw(canvas):
                 )
 
     while True:
-        for coroutine in coroutines:
+        for coroutine in coroutines[:]:
             canvas.refresh()
             canvas.border()
             try:
                 coroutine.send(None)
             except StopIteration:
                 coroutines.remove(coroutine)
-
 
 
 if __name__ == '__main__':
