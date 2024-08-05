@@ -7,7 +7,7 @@ from curses_tools import read_controls, check_boundary, draw_frame
 from itertools import cycle
 from time import sleep
 
-TIC_TIMEOUT = 0.1
+TIC_TIMEOUT = 0.005
 
 spaceship_row = 0
 spaceship_column = 0
@@ -117,8 +117,8 @@ async def blink(canvas, row, column, symbol):
 
 def draw(canvas):
     curses.curs_set(0)
-    canvas.border()
     canvas.nodelay(True)
+    
     max_y, max_x = canvas.getmaxyx()
     coroutines = [fire(canvas, start_row=max_y - 1, start_column=max_x // 2)]
 
@@ -133,14 +133,15 @@ def draw(canvas):
                 )
 
     while True:
+        canvas.refresh()
+        canvas.border()
         for coroutine in coroutines[:]:
-            canvas.refresh()
-            canvas.border()
             try:
                 coroutine.send(None)
             except StopIteration:
-                coroutines.remove(coroutine)
-
+                coroutines.remove(coroutine)       
+        sleep(TIC_TIMEOUT) 
+        
 
 if __name__ == '__main__':
     curses.update_lines_cols()
