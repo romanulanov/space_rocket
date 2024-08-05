@@ -32,6 +32,13 @@ async def animate_spaceship(canvas):
    
     while True:
         rocket_frame = next(iterator)
+        rows_direction, columns_direction, space_pressed = read_controls(canvas)
+        spaceship_row += rows_direction
+        spaceship_column += columns_direction
+        spaceship_row, spaceship_column = check_boundary(canvas,
+                                                            spaceship_row,
+                                                            spaceship_column,
+                                                            rocket_frame)
         for _ in range(2):
             draw_frame(canvas,
                     spaceship_row,
@@ -46,13 +53,7 @@ async def animate_spaceship(canvas):
                     rocket_frame,
                     negative=True,
                     )
-            rows_direction, columns_direction, space_pressed = read_controls(canvas)
-            spaceship_row += rows_direction
-            spaceship_column += columns_direction
-            spaceship_row, spaceship_column = check_boundary(canvas,
-                                                            spaceship_row,
-                                                            spaceship_column,
-                                                            rocket_frame)
+            
             
             await asyncio.sleep(0)
         
