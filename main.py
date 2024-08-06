@@ -19,19 +19,18 @@ stars = [
 ]
 
 
+
 async def animate_spaceship(canvas):
     spaceship_row = 0
     spaceship_column = 0
     rocket_frames = []
     for i in range(1, 3):
-        with open(f"images/rocket_frame_{i}.txt", "r") as my_file:
-            rocket_frames.append(my_file.read())
+            with open(f"images/rocket_frame_{i}.txt", "r") as my_file:
+                rocket_frames.append(my_file.read())
+    rocket_frames = [frame for frame in rocket_frames for _ in range(2)]
+    
            
-
-    iterator = cycle(rocket_frames)
-   
-    while True:
-        rocket_frame = next(iterator)
+    for rocket_frame in cycle(rocket_frames):
         rows_direction, columns_direction, space_pressed = read_controls(canvas)
         spaceship_row += rows_direction
         spaceship_column += columns_direction
@@ -39,23 +38,19 @@ async def animate_spaceship(canvas):
                                                             spaceship_row,
                                                             spaceship_column,
                                                             rocket_frame)
-        for _ in range(2):
-            draw_frame(canvas,
+        draw_frame(canvas,
                     spaceship_row,
                     spaceship_column,
                     rocket_frame,
-                    
                     )
-            await asyncio.sleep(0)
-            draw_frame(canvas,
+        await asyncio.sleep(0)
+        draw_frame(canvas,
                     spaceship_row,
                     spaceship_column,
                     rocket_frame,
                     negative=True,
                     )
-            
-            
-            await asyncio.sleep(0)
+        await asyncio.sleep(0)
         
 
 
