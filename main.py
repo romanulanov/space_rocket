@@ -19,7 +19,6 @@ stars = [
 ]
 
 
-
 async def animate_spaceship(canvas):
     spaceship_row = 0
     spaceship_column = 0
@@ -50,10 +49,6 @@ async def animate_spaceship(canvas):
                     rocket_frame,
                     negative=True,
                     )
-        
-        
-        
-        
 
 
 async def fire(canvas,
